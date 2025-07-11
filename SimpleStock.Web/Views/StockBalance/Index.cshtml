@@ -1,0 +1,79 @@
+@model IEnumerable<SimpleStock.Web.Models.StockBalance>
+
+@{
+    ViewData["Title"] = "Stock Balance";
+}
+
+<h2>Warehouse Stock Balance</h2>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.Product)</th>
+                <th>@Html.DisplayNameFor(model => model.Balance)</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.Product)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Balance)</td>
+                    <td>
+                        @if (item.Balance > 0)
+                        {
+                            <span class="badge bg-success">In Stock</span>
+                        }
+                        else if (item.Balance < 0)
+                        {
+                            <span class="badge bg-danger">Shortage</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Zero Balance</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        <p>No products with non-zero balance.</p>
+    </div>
+}
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Statistics</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h4 class="text-success">@Model.Count(b => b.Balance > 0)</h4>
+                            <p>Products in Stock</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h4 class="text-danger">@Model.Count(b => b.Balance < 0)</h4>
+                            <p>Products with Shortage</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h4 class="text-primary">@Model.Sum(b => Math.Max(0, b.Balance))</h4>
+                            <p>Total Stock</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

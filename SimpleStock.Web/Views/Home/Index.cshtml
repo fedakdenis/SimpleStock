@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">SimpleStock</h1>
+    <p class="lead">Warehouse Management System</p>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Stock Movements</h5>
+                <p class="card-text">Manage incoming and outgoing stock transactions.</p>
+                <a asp-controller="StockMovement" asp-action="Index" class="btn btn-primary">View Movements</a>
+                <a asp-controller="StockMovement" asp-action="Create" class="btn btn-success">Add Movement</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Stock Balance</h5>
+                <p class="card-text">View current stock quantities and inventory levels.</p>
+                <a asp-controller="StockBalance" asp-action="Index" class="btn btn-primary">View Balance</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="alert alert-info">
+            <h4>How to use the system:</h4>
+            <ul>
+                <li><strong>Incoming stock:</strong> Add a movement with type "Income", specify product, quantity and supplier</li>
+                <li><strong>Outgoing stock:</strong> Add a movement with type "Expense", specify product, quantity and recipient</li>
+                <li><strong>Balance:</strong> The system automatically calculates stock levels based on all movements</li>
+                <li><strong>Deletion:</strong> You can delete incorrectly added records</li>
+            </ul>
+        </div>
+    </div>
+</div>

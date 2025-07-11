@@ -1,0 +1,95 @@
+services:
+  # Ollama - локальная модель для AI
+  ollama:
+    image: ollama/ollama:latest
+    container_name: simplestock-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Web API приложение
+  simplestock-web:
+    build:
+      context: .
+      dockerfile: SimpleStock.Web/Dockerfile
+    container_name: simplestock-web
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Data Source=/app/SimpleStock.db
+    volumes:
+      - web_data:/app
+      - ./SimpleStock.Web/SimpleStock.db:/app/SimpleStock.db
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/stockbalance"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MCP Server
+  simplestock-mcp:
+    build:
+      context: .
+      dockerfile: SimpleStock.McpServer/Dockerfile
+    container_name: simplestock-mcp
+    ports:
+      - "3001:3001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:3001
+      - SimpleStockApiBaseUrl=http://simplestock-web/api
+      - OllamaBaseUrl=http://ollama:11434
+    volumes:
+      - mcp_data:/app
+    depends_on:
+      - simplestock-web
+      - ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Chat Console Application
+  simplestock-chat:
+    build:
+      context: .
+      dockerfile: SimpleStock.Chat/Dockerfile
+    container_name: simplestock-chat
+    environment:
+      - OllamaUri=http://ollama:11434/
+      - OllamaModel=qwen2.5
+      - SimpleStockMcpUri=http://simplestock-mcp:3001
+    depends_on:
+      - simplestock-mcp
+      - ollama
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
+volumes:
+  ollama_data:
+    driver: local
+  web_data:
+    driver: local
+  mcp_data:
+    driver: local
+
+networks:
+  default:
+    name: simplestock-network 
